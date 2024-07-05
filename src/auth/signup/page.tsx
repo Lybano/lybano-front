@@ -18,8 +18,14 @@ import {
 import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
-  cnpj: z.string().length(14, "CNPJ deve ter 14 dígitos").optional(),
+  username: z
+    .string()
+    .min(3, { message: "O nome deve ter pelo menos 3 caracteres" })
+    .max(50, { message: "O nome deve ter no máximo 50 caracteres" }),
+  cnpj: z
+    .string()
+    .min(14, { message: "CNPJ deve ter 14 caracteres com máscara" })
+    .optional(),
 });
 
 export default function SignUp() {
@@ -58,7 +64,7 @@ export default function SignUp() {
                 <FormItem>
                   <FormLabel className="font-bold">QUAL SEU NOME?</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="John Doe" {...field} />
                   </FormControl>
                   <FormDescription>Este é o seu nome público.</FormDescription>
                   <FormMessage />
@@ -84,7 +90,7 @@ export default function SignUp() {
               )}
             />
           )}
-          <Button type="submit">{step === 0 ? "Next" : "Submit"}</Button>
+          <Button type="submit">{step === 0 ? "Próximo" : "Enviar"}</Button>
         </form>
       </Form>
     </div>
