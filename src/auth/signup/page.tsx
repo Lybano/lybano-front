@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { fetchCnpjData } from "@/services/cnpj-service";
-import { ChatbotModal } from "@/components/chat";
+import { ChatbotDrawer } from "@/components/chat";
 import { ChatIcon } from "@/assets/chat-icon";
 
 const formSchema = z.object({
@@ -28,6 +28,11 @@ const formSchema = z.object({
     .string()
     .regex(/^\d{14}$/, { message: "CNPJ deve ter 14 dígitos numéricos" })
     .optional(),
+  fantasyName: z.string().optional(),
+  cnae: z.string().optional(),
+  address: z.string().optional(),
+  telephone: z.string().optional(),
+  email: z.string().email().optional(),
 });
 
 export default function SignUp() {
@@ -86,174 +91,230 @@ export default function SignUp() {
   }
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className={`space-y-8 p-8 md:p-16 shadow-2xl flex flex-col md:flex-row md:space-x-8 rounded-lg ${
-            step > 1 ? "mt-32" : ""
-          }`}
-        >
-          <div className="flex-1">
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-bold text-base flex items-center">
-                    QUAL SEU NOME?
-                    <button
-                      type="button"
-                      onClick={() => setShowChatbot(true)}
-                      className="ml-2"
-                    >
-                      <ChatIcon />
-                    </button>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="John Doe"
-                      {...field}
-                      disabled={step !== 0}
-                    />
-                  </FormControl>
-                  <FormDescription>Este é o seu nome público.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {step === 1 && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="cnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-bold flex items-center">
-                        QUAL SEU CNPJ?
-                        <button
-                          type="button"
-                          onClick={() => setShowChatbot(true)}
-                          className="ml-2"
-                        >
-                          <ChatIcon />
-                        </button>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="00000000000000" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Este é o seu número de CNPJ.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="button"
-                  onClick={handleCnpjLookup}
-                  disabled={loading}
-                >
-                  {loading ? "Buscando..." : "Buscar CNPJ"}
-                </Button>
-                {error && <div className="text-red-500">{error}</div>}
-              </>
-            )}
-            {step === 2 && cnpjData && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="cnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-bold">CNPJ</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled
-                          value={cnpjData.cnpj}
-                          placeholder={cnpjData.number_cnpj}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Este é o seu número de CNPJ.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-bold">Nome</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled
-                          value={cnpjData.razaoSocial || field.value}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <div className="flex-1 ml-8 p-4 border border-gray-200 rounded min-h-[200px]">
-                  <h3 className="font-bold text-lg">Informações do CNPJ</h3>
-                  <p>
-                    <strong>Razão Social:</strong> {cnpjData.razaoSocial || ""}
-                  </p>
-                  <p>
-                    <strong>Nome Fantasia:</strong>{" "}
-                    {cnpjData.nomeFantasia || ""}
-                  </p>
-                  <p>
-                    <strong>CNAE:</strong> {cnpjData.cnae || ""}
-                  </p>
-                  <p>
-                    <strong>Proprietários:</strong>
-                  </p>
-                  <ul>
-                    {cnpjData.proprietarios &&
-                    cnpjData.proprietarios.length > 0 ? (
-                      cnpjData.proprietarios.map(
-                        (proprietario: string, index: number) => (
-                          <li key={index}>{proprietario}</li>
-                        )
-                      )
-                    ) : (
-                      <li>Nenhum proprietário encontrado.</li>
+    <div className="h-screen flex items-center justify-center bg-blue-50">
+      <div className="flex flex-col justify-start p-16 rounded-l-lg">
+        <div className="flex p-2 flex-col items-center justify-center w-full max-w-4xl">
+          <h1 className="text-4xl font-extrabold">Sistema Lybano</h1>
+          <p className="text-lg text-center font-medium">
+            Bem-vindo! Por favor, preencha seus dados.
+          </p>
+          <Button
+            onClick={() => setShowChatbot(true)}
+            className="my-2 flex flex-row gap-1"
+          >
+            Assistente Virtual
+            <ChatIcon />
+          </Button>
+        </div>
+        <div className="flex-1">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold">Qual seu nome?</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="John Doe"
+                        {...field}
+                        disabled={step !== 0}
+                        className="border border-gray-300 rounded-lg p-2"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Este é o seu nome público.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {step === 1 && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="cnpj"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-bold">
+                          Qual seu CNPJ?
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="00000000000000"
+                            {...field}
+                            className="border border-gray-300 rounded-lg p-2"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Este é o seu número de CNPJ.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </ul>
-                  <p>
-                    <strong>Endereço:</strong> {cnpjData.endereco || ""}
-                  </p>
-                  <p>
-                    <strong>Telefone:</strong> {cnpjData.telefone || ""}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {cnpjData.email || ""}
-                  </p>
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleCnpjLookup}
+                    disabled={loading}
+                  >
+                    {loading ? "Buscando..." : "Buscar CNPJ"}
+                  </Button>
+                  {error && <div className="text-red-500">{error}</div>}
+                </>
+              )}
+              {step === 2 && cnpjData && (
+                <div className="bg-blue-50 rounded-lg p-4 mt-6 shadow-md w-full">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="cnpj"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold">CNPJ</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled
+                              value={cnpjData.number_cnpj}
+                              className="border border-gray-300 rounded-lg p-2"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold">
+                            Razão Social
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled
+                              value={cnpjData.razaoSocial || field.value}
+                              className="border border-gray-300 rounded-lg p-2"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="fantasyName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold">
+                            Nome Fantasia
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled
+                              value={cnpjData.nomeFantasia || ""}
+                              className="border border-gray-300 rounded-lg p-2"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="cnae"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold">CNAE</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled
+                              value={cnpjData.cnae || ""}
+                              className="border border-gray-300 rounded-lg p-2"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold">Endereço</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled
+                              value={cnpjData.endereco || ""}
+                              className="border border-gray-300 rounded-lg p-2"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="telephone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold">Telefone</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled
+                              value={cnpjData.telefone || ""}
+                              className="border border-gray-300 rounded-lg p-2"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-bold">Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled
+                              value={cnpjData.email || ""}
+                              className="border border-gray-300 rounded-lg p-2"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
-              </>
-            )}
-            <div className="flex justify-between mt-4">
-              {step > 0 && (
-                <Button type="button" onClick={onBack}>
-                  Voltar
-                </Button>
               )}
-              {step < 1 && (
-                <Button type="button" onClick={handleNextStep}>
-                  Próximo
-                </Button>
-              )}
-              {step > 1 && <Button type="submit">Enviar</Button>}
-            </div>
-          </div>
-        </form>
-      </Form>
-      {showChatbot && <ChatbotModal onClose={() => setShowChatbot(false)} />}
+              <div className="flex justify-between mt-4">
+                {step > 0 && (
+                  <Button type="button" className="w-full" onClick={onBack}>
+                    Voltar
+                  </Button>
+                )}
+                {step < 1 && (
+                  <Button
+                    type="button"
+                    onClick={handleNextStep}
+                    className="w-full"
+                  >
+                    Próximo
+                  </Button>
+                )}
+                {step > 1 && <Button type="submit">Enviar</Button>}
+              </div>
+            </form>
+          </Form>
+        </div>
+      </div>
+      {showChatbot && <ChatbotDrawer onClose={() => setShowChatbot(false)} />}
     </div>
   );
 }
