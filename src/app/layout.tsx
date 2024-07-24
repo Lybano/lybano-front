@@ -18,6 +18,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <title>Sistema Lybano</title>
+        <meta
+          name="description"
+          content="Descrição padrão do meu aplicativo Next.js"
+        />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
