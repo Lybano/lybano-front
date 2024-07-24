@@ -254,7 +254,7 @@ export default function SignUp() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="font-bold text-primary">
-                              Nome
+                              Razão Social
                             </FormLabel>
                             <FormControl>
                               <Input
