@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input";
 import { getCnpjData, postCnpjData } from "@/services/cnpj-service";
 import { ChatbotModal } from "@/components/chat";
 import { ChatIcon } from "@/assets/chat-icon";
-import { Alert } from "@/components/ui/alert";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
@@ -31,12 +30,13 @@ const formSchema = z.object({
     .string()
     .regex(/^\d{14}$/, { message: "CNPJ deve ter 14 dígitos numéricos" })
     .optional(),
+  razaoSocial: z.string().optional(),
   fantasyName: z.string().optional(),
   cnae: z.string().optional(),
   address: z.string().optional(),
   telephone: z.string().optional(),
   email: z.string().email().optional(),
-  prestadora_servico: z.string().optional(),
+  prestadora_servico: z.enum(["Presta serviços", "Vende produtos"]).optional(),
   ramo: z.string().optional(),
 });
 
@@ -250,7 +250,7 @@ export default function SignUp() {
                       />
                       <FormField
                         control={form.control}
-                        name="username"
+                        name="razaoSocial"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="font-bold text-primary">
@@ -260,7 +260,7 @@ export default function SignUp() {
                               <Input
                                 {...field}
                                 disabled
-                                value={formData.username || field.value}
+                                value={cnpjData.razao_social || ""}
                                 className="border border-border rounded-lg p-2"
                               />
                             </FormControl>
@@ -373,21 +373,28 @@ export default function SignUp() {
                         <ChatIcon />
                       </Button>
                     </div>
-                    <div className="bg-[var(--input)] rounded-lg p-8 mt-6 shadow-md w-full text-[var(--foreground)]">
+                    <div className="rounded-lg p-8 mt-6 shadow-md w-full text-foreground">
                       <FormField
                         control={form.control}
                         name="prestadora_servico"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="flex flex-col gap-2 mb-4">
                             <FormLabel className="font-bold text-primary">
-                              A empresa é prestadora de serviço?
+                              A empresa presta serviços ou vende produtos?
                             </FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="Sim ou Não"
+                              <select
                                 {...field}
-                                className="border border-border rounded-lg p-2 bg-[var(--input)] text-[var(--foreground)]"
-                              />
+                                className="border border-border rounded-lg p-2 text-foreground"
+                              >
+                                <option value="">Selecione uma opção</option>
+                                <option value="Presta serviços">
+                                  Presta serviços
+                                </option>
+                                <option value="Vende produtos">
+                                  Vende produtos
+                                </option>
+                              </select>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -431,6 +438,7 @@ export default function SignUp() {
                     </div>
                   </>
                 )}
+
                 {step === 0 && (
                   <Button
                     type="button"
