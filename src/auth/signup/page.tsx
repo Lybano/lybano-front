@@ -103,6 +103,7 @@ export default function SignUp() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      setLoading(true);
       setError(null);
       setSuccessMessage(null);
       await postCnpjData(values);
@@ -114,6 +115,8 @@ export default function SignUp() {
     } catch (err) {
       console.error("Error:", err);
       setError(err instanceof Error ? err.message : "Erro ao cadastrar CNPJ");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -222,12 +225,6 @@ export default function SignUp() {
                       {loading ? "Buscando..." : "Consultar CNPJ"}
                     </Button>
                   </>
-                )}
-                {error && (
-                  <div className="text-red-500 mt-2">
-                    <ExclamationTriangleIcon className="h-4 w-4 inline-block mr-2" />
-                    {error}
-                  </div>
                 )}
                 {step === 2 && cnpjData && !cnpjConfirmed && (
                   <div className="bg-[var(--input)] rounded-lg p-8 mt-6 shadow-md w-full text-[var(--foreground)]">
@@ -367,6 +364,15 @@ export default function SignUp() {
                 )}
                 {step === 2 && cnpjConfirmed && (
                   <>
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={() => setShowChatbot(true)}
+                        className="my-2 flex flex-row gap-1 bg-accent text-accent-foreground hover:bg-input"
+                      >
+                        Assistente Virtual
+                        <ChatIcon />
+                      </Button>
+                    </div>
                     <div className="bg-[var(--input)] rounded-lg p-8 mt-6 shadow-md w-full text-[var(--foreground)]">
                       <FormField
                         control={form.control}
@@ -407,16 +413,6 @@ export default function SignUp() {
                         )}
                       />
                     </div>
-                    <div className="mt-4">
-                      <Button
-                        type="button"
-                        onClick={() => setShowChatbot(true)}
-                        className="bg-primary text-primary-foreground hover:bg-input"
-                      >
-                        Assistente Virtual
-                        <ChatIcon />
-                      </Button>
-                    </div>
                     <div className="flex justify-between mt-4">
                       <Button
                         type="button"
@@ -427,9 +423,10 @@ export default function SignUp() {
                       </Button>
                       <Button
                         type="submit"
+                        disabled={loading}
                         className="bg-primary text-primary-foreground"
                       >
-                        Finalizar
+                        {loading ? "Carregando..." : "Finalizar"}
                       </Button>
                     </div>
                   </>
